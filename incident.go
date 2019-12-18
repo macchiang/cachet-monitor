@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Incident Cachet data model
@@ -68,8 +69,8 @@ func (incident *Incident) Send(cfg *CachetMonitor) error {
 		return fmt.Errorf("Could not create/update incident!")
 	}
 	// send slack message
-	if cfg.SlackWebhook !="" {
-		sendSlack(cfg)
+	if cfg.SlackWebhook != "" {
+		incident.sendSlack(cfg)
 	}
 	return nil
 }
@@ -116,13 +117,13 @@ func (incident *Incident) SetFixed() {
 
 // Send slack message
 func (incident *Incident) sendSlack(cfg *CachetMonitor) {
-	color:="#bf1932" //red
+	color := "#bf1932" //red
 	if incident.ComponentStatus == 1 {
 
-		color="#36a64f" //green
+		color = "#36a64f" //green
 	}
 	slack := Slack{
-		WebhookUrl: cfg.SlackWebhook
+		WebhookUrl: cfg.SlackWebhook,
 		Attachments: []Attachments{
 			Attachments{
 				Fallback:   incident.Name,
@@ -137,6 +138,6 @@ func (incident *Incident) sendSlack(cfg *CachetMonitor) {
 		}}
 	err := slack.SendSlackNotification()
 	if err != nil {
-		fmt.Errorf(err)
+		fmt.Errorf("Slack failed: %v", err)
 	}
 }
